@@ -17,5 +17,16 @@
   },
   "files": {
     "includes": ["**", "!**/dist", "!**/build", "!**/node_modules"]
-  }
+  },
+  "overrides": [
+    {
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noUnknownAtRules": "off"
+          }
+        }
+      }
+    }
+  ]
 }

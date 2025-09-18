@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "image": "https://picsum.photos/seed/101/640/360",
+    "date": "September 1, 2025",
+    "title": "Breaking News #1: Global Tech Conference Kicks Off",
+    "preview": "The world’s largest technology conference has started, bringing together experts, startups, and investors.",
+    "text": "The Global Tech Conference 2025 officially opened today, gathering thousands of participants from over 50 countries. \n\nThe event focuses on artificial intelligence, cybersecurity, and sustainable technology. Industry leaders highlighted the importance of responsible AI development and global collaboration. \n\nWorkshops and panel discussions will run throughout the week, giving startups a chance to present their innovations. Organizers expect this year’s event to set new records in both attendance and investment deals."
+  },
+  {
+    "id": "2",
+    "image": "https://picsum.photos/seed/102/640/360",
+    "date": "September 2, 2025",
+    "title": "Sports Update: Local Team Secures Championship Win",
+    "preview": "The city’s football team claimed victory in the national championship final after a dramatic penalty shootout.",
+    "text": "In an unforgettable night for football fans, the City Strikers secured the national championship title. The game ended in a tense 2-2 draw, pushing both teams to penalties. \n\nGoalkeeper James Carter became the hero of the evening, saving two crucial shots. Fans filled the stadium and the streets in celebration, marking the team’s first championship win in over a decade. \n\nThe club’s coach praised the players’ dedication and announced plans for a victory parade later this week."
+  },
+  {
+    "id": "3",
+    "image": "https://picsum.photos/seed/103/640/360",
+    "date": "September 3, 2025",
+    "title": "Environment: Major Push for Renewable Energy",
+    "preview": "Government leaders announced a new initiative to expand renewable energy sources and reduce carbon emissions.",
+    "text": "The Ministry of Energy revealed an ambitious plan to increase the country’s use of solar and wind energy by 40% within the next five years. \n\nOfficials emphasized the need to reduce dependency on fossil fuels and invest in green technologies. Funding will support local communities, providing incentives for households to install solar panels. \n\nEnvironmental groups welcomed the decision but urged stronger regulations to ensure accountability. Experts believe this could be a turning point in the fight against climate change."
+  },
+  {
+    "id": "4",
+    "image": "https://picsum.photos/seed/104/640/360",
+    "date": "September 4, 2025",
+    "title": "Health: New Breakthrough in Cancer Research",
+    "preview": "Scientists announced promising results from a new experimental treatment tested in early clinical trials.",
+    "text": "Researchers from the National Health Institute reported groundbreaking progress in cancer treatment. Their new therapy, based on immune cell engineering, showed positive results in shrinking tumors among test patients. \n\nThe trials are still in early stages, but doctors say this could lead to a revolutionary treatment with fewer side effects than traditional chemotherapy. \n\nMedical experts caution that more research is needed before widespread use, but the discovery brings new hope to millions of patients worldwide."
+  },
+  {
+    "id": "5",
+    "image": "https://picsum.photos/seed/105/640/360",
+    "date": "September 5, 2025",
+    "title": "Economy: Stock Market Hits Record High",
+    "preview": "Global markets experienced a surge today, with tech companies leading the rally.",
+    "text": "Investors celebrated as the stock market reached a new all-time high. Technology and renewable energy companies saw the strongest growth, while traditional industries remained stable. \n\nExperts attribute the rise to stronger-than-expected quarterly earnings and renewed optimism about global economic recovery. \n\nHowever, analysts warn of potential volatility ahead, especially with central banks expected to adjust interest rates later this year. For now, the market mood remains positive, fueling confidence among both small and institutional investors."
+  }
+]
