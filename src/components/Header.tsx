@@ -19,7 +19,7 @@ export default function Header() {
       <Container>
         <div className="flex h-14 items-center justify-between gap-4">
           <Link to="/" className="text-lg font-semibold">
-            News App
+            NASA News
           </Link>
 
           <nav className="flex items-center gap-4">
