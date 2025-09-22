@@ -1,6 +1,6 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { fetchFeed } from "./api";
 import { fetchArticle } from "@/features/article/api";
+import { fetchFeed } from "./api";
 
 export function useFeed(url?: string) {
   return useQuery({

@@ -7,7 +7,7 @@ export type ArticleResponse = {
   publishedAt: string | null;
   heroImage?: string | null;
   paragraphs: string[];
-  text: string;   
+  text: string;
   images: string[];
 };
 

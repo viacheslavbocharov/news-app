@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import { encodeLinkToId } from "@/features/news/linkCodec";
 import { usePrefetchArticle } from "@/features/feed/hooks";
+import { encodeLinkToId } from "@/features/news/linkCodec";
 
 type CardProps = {
-  link: string;   
-  image?: string;  
+  link: string;
+  image?: string;
   title: string;
   date?: string;
   preview?: string;

@@ -1,5 +1,5 @@
-import { useFeed } from "@/features/feed/hooks";
 import ArticleCard from "@/components/ArticleCard";
+import { useFeed } from "@/features/feed/hooks";
 
 export default function Home() {
   const { data, isLoading, isError, error } = useFeed();

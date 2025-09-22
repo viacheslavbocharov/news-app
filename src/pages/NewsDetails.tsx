@@ -1,5 +1,5 @@
-import { Link, useParams } from "react-router-dom";
 import { useMemo } from "react";
+import { Link, useParams } from "react-router-dom";
 import { useArticle } from "@/features/article/hooks";
 
 function safeDecodeIdToLink(id?: string) {

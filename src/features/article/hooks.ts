@@ -1,6 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
-import { fetchArticle, type ArticleResponse } from "./api";
-import { fetchArticlePreview, type ArticlePreviewResponse } from "./api";
+import {
+  type ArticlePreviewResponse,
+  type ArticleResponse,
+  fetchArticle,
+  fetchArticlePreview,
+} from "./api";
 
 type ApiError = { status?: number; code?: string; message?: string };
 

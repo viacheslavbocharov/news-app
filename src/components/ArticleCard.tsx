@@ -1,8 +1,8 @@
 import { Link } from "react-router-dom";
+import { useArticleHero } from "@/features/article/hooks";
 import { encodeLinkToId } from "@/features/news/linkCodec";
 import { isSupportedLink } from "@/features/news/supported";
 import { useInViewport } from "@/shared/useInViewport";
-import { useArticleHero } from "@/features/article/hooks";
 
 type Props = {
   link: string;
@@ -28,7 +28,9 @@ export default function ArticleCard({ link, title, date, imageFallback }: Props)
                  bg-white dark:bg-gray-900 shadow hover:shadow-lg
                  transition-transform duration-200 hover:scale-105 block"
       aria-disabled={!supported}
-      onClick={(e) => { if (!supported) e.preventDefault(); }}
+      onClick={(e) => {
+        if (!supported) e.preventDefault();
+      }}
       title={supported ? title : "Article preview is not supported for this source"}
     >
       <div className="relative aspect-[16/9] w-full overflow-hidden rounded-t-lg bg-gray-100 dark:bg-gray-800">
