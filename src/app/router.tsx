@@ -11,7 +11,6 @@ export const router = createBrowserRouter([
     element: <Layout />,
     children: [
       { path: "/", element: <Home /> },
-      { path: "/news/:id", element: <NewsDetails /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
 
@@ -19,6 +18,7 @@ export const router = createBrowserRouter([
       {
         element: <ProtectedRoute />,
         children: [
+          { path: "/news/:id", element: <NewsDetails /> },
           // { path: "/dashboard", element: <Dashboard /> },
         ],
       },

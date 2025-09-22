@@ -3,6 +3,7 @@ import newsData from "@/mocks/news.json";
 
 export default function NewsDetails() {
   const { id } = useParams();
+
   const news = newsData.find((n) => n.id === id);
 
   if (!news) {

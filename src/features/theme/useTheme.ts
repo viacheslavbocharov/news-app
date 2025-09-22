@@ -19,18 +19,15 @@ export function useTheme() {
     return saved === "light" || saved === "dark" ? saved : "system";
   });
 
-  // применяем максимально рано
   useLayoutEffect(() => {
     apply(theme);
   }, [theme]);
 
-  // синхронизируем localStorage
   useEffect(() => {
     if (theme === "system") localStorage.removeItem(KEY);
     else localStorage.setItem(KEY, theme);
   }, [theme]);
 
-  // если system — реагируем на смену темы ОС
   useEffect(() => {
     if (!mql || theme !== "system") return;
     const handler = () => apply("system");
@@ -42,7 +39,6 @@ export function useTheme() {
     theme,
     isDark: theme === "dark" || (theme === "system" && (mql?.matches ?? false)),
     setTheme,
-    // ТОЛЬКО ручной toggle: всегда записываем явный выбор
     toggle: () => setTheme((t) => (t === "dark" ? "light" : "dark")),
   };
 }

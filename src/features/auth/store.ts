@@ -4,7 +4,6 @@ import type { Credentials, User } from "./types";
 
 const LS_KEY = "auth:user";
 
-/** Строка из users.json (включая пароль для проверки на клиенте в моках) */
 type UserRow = {
   id: string;
   name: string;
@@ -12,7 +11,6 @@ type UserRow = {
   password: string;
 };
 
-/** Жёстко типизируем импорт JSON-а как массив UserRow */
 const USERS: readonly UserRow[] = usersJson as unknown as UserRow[];
 
 type AuthState = {
@@ -64,5 +62,4 @@ export const useAuth = create<AuthState>()((set) => ({
   },
 }));
 
-// инициализация из localStorage при первом импорте стора
 useAuth.getState()._hydrate();
