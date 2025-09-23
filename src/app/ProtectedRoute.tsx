@@ -1,8 +1,14 @@
-import { Navigate, Outlet } from "react-router-dom";
-import { useAuth } from "@/features/auth/store";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
+import { useMe } from "@/features/auth/hooks/useMe";
 
 export default function ProtectedRoute() {
-  const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  const { data: user, isLoading } = useMe();
+  const location = useLocation();
+
+  if (isLoading) return <div className="p-6">Loading…</div>;
+  if (!user) {
+    const redirect = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?redirect=${redirect}`} replace />;
+  }
   return <Outlet />;
 }
