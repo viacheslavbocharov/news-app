@@ -1,16 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
-import * as z from "zod";
 import Button from "@/components/Button";
-import { useRegister } from "@/features/auth/hooks";
-
-const schema = z.object({
-  name: z.string().min(2, "Minimum 2 characters"),
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Minimum 6 characters"),
-});
-type FormData = z.infer<typeof schema>;
+import { useRegister } from "@/features/auth/hooks/useRegister";
+import { registerSchema, type RegisterForm } from "@/features/auth/schemas/register";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -22,11 +15,11 @@ export default function Register() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<RegisterForm>({ resolver: zodResolver(registerSchema) });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: RegisterForm) => {
     try {
-      await registerMut.mutateAsync(data); // бек поставит cookie, мы инвалидируем ["me"]
+      await registerMut.mutateAsync(data);
       navigate(redirect);
     } catch (e) {
       console.error("Registration error:", e);

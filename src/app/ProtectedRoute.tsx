@@ -1,5 +1,5 @@
 import { Navigate, Outlet, useLocation } from "react-router-dom";
-import { useMe } from "@/features/auth/hooks";
+import { useMe } from "@/features/auth/hooks/useMe";
 
 export default function ProtectedRoute() {
   const { data: user, isLoading } = useMe();

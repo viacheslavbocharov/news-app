@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useArticleHero } from "@/features/article/hooks";
+import { useArticleHero } from "@/features/article/hooks/useArticleHero";
 import { encodeLinkToId } from "@/features/news/linkCodec";
 import { isSupportedLink } from "@/features/news/supported";
 import { useInViewport } from "@/shared/useInViewport";

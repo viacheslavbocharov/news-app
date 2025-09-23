@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import { useArticle } from "@/features/article/hooks";
+import { useArticle } from "@/features/article/hooks/useArticle";
 
 function safeDecodeIdToLink(id?: string) {
   if (!id) return undefined;

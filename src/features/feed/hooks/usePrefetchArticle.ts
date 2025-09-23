@@ -1,14 +1,5 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { fetchArticle } from "@/features/article/api";
-import { fetchFeed } from "./api";
-
-export function useFeed(url?: string) {
-  return useQuery({
-    queryKey: ["feed", { url: url ?? "default" }],
-    queryFn: () => fetchFeed(url),
-    staleTime: 60 * 1000,
-  });
-}
 
 export function usePrefetchArticle() {
   const qc = useQueryClient();

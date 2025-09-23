@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { usePrefetchArticle } from "@/features/feed/hooks";
+import { usePrefetchArticle } from "@/features/feed/hooks/usePrefetchArticle";
 import { encodeLinkToId } from "@/features/news/linkCodec";
 
 type CardProps = {

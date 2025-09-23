@@ -1,15 +1,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import * as z from "zod";
+// import * as z from "zod";
 import Button from "@/components/Button";
-import { useLogin } from "@/features/auth/hooks";
+import { useLogin } from "@/features/auth/hooks/useLogin";
+import { loginSchema, type LoginForm } from "@/features/auth/schemas/login";
 
-const schema = z.object({
-  email: z.string().email("Enter a valid email"),
-  password: z.string().min(6, "Minimum 6 characters"),
-});
-type FormData = z.infer<typeof schema>;
+// const schema = z.object({
+//   email: z.string().email("Enter a valid email"),
+//   password: z.string().min(6, "Minimum 6 characters"),
+// });
+// type LoginForm = z.infer<typeof schema>;
 
 export default function Login() {
   const navigate = useNavigate();
@@ -22,9 +23,9 @@ export default function Login() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>({ resolver: zodResolver(schema) });
+  } = useForm<LoginForm>({ resolver: zodResolver(loginSchema) });
 
-  const onSubmit = async (data: FormData) => {
+  const onSubmit = async (data: LoginForm) => {
     try {
       await login.mutateAsync({ email: data.email, password: data.password });
       navigate(redirect);

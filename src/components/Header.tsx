@@ -1,6 +1,7 @@
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import ThemeToggle from "@/components/ThemeToggle";
-import { useLogout, useMe } from "@/features/auth/hooks";
+import { useLogout } from "@/features/auth/hooks/useLogout";
+import { useMe } from "@/features/auth/hooks/useMe";
 import Button from "./Button";
 import Container from "./Container";
 
