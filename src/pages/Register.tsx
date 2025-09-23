@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "@/components/Button";
 import { useRegister } from "@/features/auth/hooks/useRegister";
-import { registerSchema, type RegisterForm } from "@/features/auth/schemas/register";
+import { type RegisterForm, registerSchema } from "@/features/auth/schemas/register";
 
 export default function Register() {
   const navigate = useNavigate();

@@ -1,16 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-// import * as z from "zod";
 import Button from "@/components/Button";
 import { useLogin } from "@/features/auth/hooks/useLogin";
-import { loginSchema, type LoginForm } from "@/features/auth/schemas/login";
-
-// const schema = z.object({
-//   email: z.string().email("Enter a valid email"),
-//   password: z.string().min(6, "Minimum 6 characters"),
-// });
-// type LoginForm = z.infer<typeof schema>;
+import { type LoginForm, loginSchema } from "@/features/auth/schemas/login";
 
 export default function Login() {
   const navigate = useNavigate();

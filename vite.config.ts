@@ -69,5 +69,5 @@ export default defineConfig({
       mangle: true,
     },
   },
-  server: { host: 'localhost', port: 5174 },
+  server: { host: "localhost", port: 5174 },
 });

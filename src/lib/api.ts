@@ -59,9 +59,9 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
         ? (data as { message: string }).message
         : res.statusText) || `HTTP ${res.status}`;
     const code =
-      (data && typeof data === "object" && "code" in data
+      data && typeof data === "object" && "code" in data
         ? (data as { code: string }).code
-        : "HTTP_ERROR");
+        : "HTTP_ERROR";
 
     const err: ApiError = new Error(msg);
     err.status = res.status;
@@ -70,5 +70,5 @@ export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
     throw err;
   }
 
-  return (isJson ? (data as T) : (null as T));
+  return isJson ? (data as T) : (null as T);
 }

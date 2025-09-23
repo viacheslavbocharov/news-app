@@ -1,4 +1,4 @@
-import { useQuery} from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { fetchFeed } from "../api";
 
 export function useFeed(url?: string) {
@@ -8,4 +8,3 @@ export function useFeed(url?: string) {
     staleTime: 60 * 1000,
   });
 }
-
