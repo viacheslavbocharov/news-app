@@ -7,6 +7,8 @@ import Register from "@/pages/Register";
 import Layout from "./layout";
 import ProtectedRoute from "./ProtectedRoute";
 
+const ADS_ENABLED = import.meta.env.VITE_ENABLE_ADS === "true";
+
 export const router = createBrowserRouter([
   {
     element: <Layout />,
@@ -14,7 +16,7 @@ export const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
-      { path: "/ads-debug", element: <AdsDebug /> },
+      ...(ADS_ENABLED ? [{ path: "/ads-debug", element: <AdsDebug /> }] : []),
 
       // будущие приватные страницы:
       {

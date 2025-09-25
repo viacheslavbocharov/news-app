@@ -35,7 +35,9 @@ function virtualFlags() {
 
 // ВАЖНО: конфиг как функция, чтобы знать mode и подхватить .env
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), ""); // загрузит VITE_*
+  const env = loadEnv(mode, process.cwd(), "");
+  const host = env.VITE_DEV_HOST || "localhost";
+  const port = Number(env.VITE_DEV_PORT || env.PORT || 5174);
 
   const enableAds = env.VITE_ENABLE_ADS === "true";
   const enableGads = env.VITE_ENABLE_GADS === "true";
@@ -78,47 +80,7 @@ export default defineConfig(({ mode }) => {
         mangle: true,
       },
     },
-    server: { host: "localhost", port: 5174 },
+    server: { host, port },
+    preview: { host, port },
   };
 });
-
-// export default defineConfig({
-//   plugins: [
-//     react(),
-//     tailwind(),
-//     tsconfigPaths(),
-//     virtualModules(),
-//     svgr(),
-//     checker({
-//       typescript: true,
-//     }),
-
-//     viteCompression({ algorithm: "brotliCompress" }),
-
-//     Inspect(),
-
-//     {
-//       ...visualizer({
-//         filename: "stats.html",
-//         gzipSize: true,
-//         brotliSize: true,
-//         open: true, // true — чтобы автОткрывал отчет после билда
-//       }),
-//       apply: "build",
-//     },
-//     virtualFlags(),
-//   ],
-
-//   build: {
-//     minify: "terser",
-//     terserOptions: {
-//       compress: {
-//         drop_console: true,
-//         drop_debugger: true,
-//       },
-//       format: { comments: false },
-//       mangle: true,
-//     },
-//   },
-//   server: { host: "localhost", port: 5174 },
-// });

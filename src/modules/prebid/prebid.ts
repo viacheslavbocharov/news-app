@@ -104,20 +104,20 @@ function getPbjs(): Pbjs | null {
 const rendered = new Set<string>();
 let eventsBound = false;
 
-function bindEventsOnce(pb: Pbjs): void {
+function bindEventsOnce(pbjs: Pbjs): void {
   if (eventsBound) return;
   eventsBound = true;
 
   // почему не рендерим bidWon:
-  // bidWon зпускается renderAd или когда сервер отдал креатив, если ждать bidWon,
-  // чтобы вызвать renderAd, событие не придёт.
-  // Поэтому рендерим на bidResponse после аукциона.
+  // bidWon испускается после renderAd или когда ад-сервер отдал креатив.
+  // Если ждать bidWon, чтобы вызвать renderAd, событие не придёт.
+  // Поэтому рендерим на bidResponse сразу после аукциона.
 
-  pb.onEvent("auctionInit", (evt) => {
+  pbjs.onEvent("auctionInit", (evt) => {
     emitAdEvent("auctionInit", evt);
   });
 
-  pb.onEvent("bidResponse", (bid) => {
+  pbjs.onEvent("bidResponse", (bid) => {
     emitAdEvent("bidResponse", bid);
     if (rendered.has(bid.adUnitCode)) return;
 
@@ -146,18 +146,18 @@ function bindEventsOnce(pb: Pbjs): void {
     }
 
     try {
-      pb.renderAd(doc, bid.adId);
+      pbjs.renderAd(doc, bid.adId);
       rendered.add(bid.adUnitCode);
     } catch {
-      /* ignore */
+      /* ignore or handle */
     }
   });
 
-  pb.onEvent("bidWon", (bid) => {
+  pbjs.onEvent("bidWon", (bid) => {
     emitAdEvent("bidWon", bid);
   });
 
-  pb.onEvent("auctionEnd", (evt) => {
+  pbjs.onEvent("auctionEnd", (evt) => {
     emitAdEvent("auctionEnd", evt);
   });
 }
@@ -176,11 +176,11 @@ function scanAndMountOnce(): string[] {
 }
 
 function runAuctionFor(codes: string[]): void {
-  const pb = getPbjs();
-  if (!pb || codes.length === 0) return;
+  const pbjs = getPbjs();
+  if (!pbjs || codes.length === 0) return;
 
-  pb.que.push(() => {
-    pb.setConfig?.({
+  pbjs.que.push(() => {
+    pbjs.setConfig?.({
       debug: true,
       userSync: { enabled: false },
       bidderTimeout: 3000,
@@ -203,14 +203,15 @@ function runAuctionFor(codes: string[]): void {
         },
       ],
     });
-    bindEventsOnce(pb);
+
+    bindEventsOnce(pbjs);
 
     const units: PbjsAdUnit[] = ANCHORS.filter((a) => codes.includes(a.code)).map((a) =>
       toAdUnit(a.code, a.sizes),
     );
 
-    pb.addAdUnits(units);
-    pb.requestBids({ timeout: 3000, adUnitCodes: codes });
+    pbjs.addAdUnits(units);
+    pbjs.requestBids({ timeout: 3000, adUnitCodes: codes });
   });
 }
 
