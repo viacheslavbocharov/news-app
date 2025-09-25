@@ -3,4 +3,4 @@ dist
 build
 coverage
 .storybook
-public
+public/

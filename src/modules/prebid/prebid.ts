@@ -2,7 +2,7 @@ type Size = readonly [number, number];
 
 const ADTELLIGENT_AID = 350975;
 const BIDMATIC_SOURCE = 886409;
-const BOCHAROV_PUBLISHER_ID = 'demo-pub-123';
+const BOCHAROV_PUBLISHER_ID = "demo-pub-123";
 
 type AnchorSlot = {
   code: string;

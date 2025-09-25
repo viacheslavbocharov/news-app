@@ -16,7 +16,7 @@
     }
   },
   "files": {
-    "includes": ["**", "!**/dist", "!**/build", "!**/node_modules"]
+    "includes": ["**", "!**/dist", "!**/build", "!**/node_modules"]    
   },
   "overrides": [
     {
