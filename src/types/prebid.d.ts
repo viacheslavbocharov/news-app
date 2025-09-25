@@ -78,8 +78,13 @@ declare global {
     adUnitCodes?: string[];
   }
 
-  interface PbjsUserSyncConfig { enabled?: boolean }
-  interface PbjsConfig { debug?: boolean; userSync?: PbjsUserSyncConfig }
+  interface PbjsUserSyncConfig {
+    enabled?: boolean;
+  }
+  interface PbjsConfig {
+    debug?: boolean;
+    userSync?: PbjsUserSyncConfig;
+  }
 
   interface PbjsAuctionInitEvent {
     auctionId: string;

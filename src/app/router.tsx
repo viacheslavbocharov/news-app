@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import AdsDebug from "@/pages/AdsDebug";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import NewsDetails from "@/pages/NewsDetails";
@@ -13,6 +14,7 @@ export const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
+      { path: "/ads-debug", element: <AdsDebug /> },
 
       // будущие приватные страницы:
       {

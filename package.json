@@ -7,11 +7,11 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "lint": "biome lint .",
-    "format": "biome format --write .",
-    "check": "biome check .",
-    "fix": "biome check --write .",
-    "ci:biome": "biome ci ."
+    "lint": "biome lint src",
+    "format": "biome format --write src",
+    "check": "biome check src",
+    "fix": "biome check --write src",
+    "ci:biome": "biome ci src"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

@@ -16,19 +16,17 @@ export default function virtualModules(opts: Options = {}) {
       if (id !== VIRTUAL_ID) return null;
 
       const modules: string[] = [];
-      if (opts.enableAds)  modules.push("prebid"); // /src/modules/prebid.ts
-      if (opts.enableGads) modules.push("gads");   // /src/modules/gads.ts (позже)
+      if (opts.enableAds) modules.push("prebid");
+      if (opts.enableGads) modules.push("gads");
 
-      // Чтобы было видно в консоли браузера, что виртуальный модуль сработал:
       const banner = `console.log("[virtual] loaded: ${modules.join(", ") || "none"}");\n`;
 
       if (modules.length === 0) {
-        // Пустой модуль, но с видимым логом
         return banner;
       }
 
-      const imports = modules.map((m) => `import "/src/modules/${m}.ts";`).join("\n");
-      return banner + imports + "\n";
+      const imports = modules.map((m) => `import "/src/modules/prebid/${m}.ts";`).join("\n");
+      return `${banner}${imports}\n`;
     },
   };
 }
