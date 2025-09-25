@@ -2,6 +2,7 @@ type Size = readonly [number, number];
 
 const ADTELLIGENT_AID = 350975;
 const BIDMATIC_SOURCE = 886409;
+const BOCHAROV_PUBLISHER_ID = 'demo-pub-123';
 
 type AnchorSlot = {
   code: string;
@@ -85,6 +86,7 @@ function toAdUnit(code: string, sizes: readonly Size[]): PbjsAdUnit {
     bids: [
       { bidder: "adtelligent", params: { aid: ADTELLIGENT_AID } },
       { bidder: "bidmatic", params: { source: BIDMATIC_SOURCE } },
+      { bidder: "bocharov", params: { publisherId: BOCHAROV_PUBLISHER_ID } },
     ],
   };
 }
