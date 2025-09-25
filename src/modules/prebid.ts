@@ -82,31 +82,58 @@ type AnchorSlot = {
 };
 
 const ANCHORS: readonly AnchorSlot[] = [
-  { code: "ad-home-top",     selector: "main .max-w-5xl", position: "afterbegin", sizes: [[300, 250], [300, 600]], reserve: [300, 250] },
-  { code: "ad-home-sidebar", selector: "main .max-w-5xl", position: "beforeend",  sizes: [[300, 250], [300, 600]], reserve: [300, 250] },
+  {
+    code: "ad-home-top",
+    selector: "main",           // якорь — сам <main>
+    position: "beforebegin",    // ВСТАВИТЬ ПЕРЕД <main> (над контентом)
+    sizes: [[970, 250], [970, 90], [728, 90], [320, 100], [320, 50]],
+    reserve: [728, 90],
+  },
+  {
+    code: "ad-home-bottom",
+    selector: "main",           // тот же якорь
+    position: "afterend",       // ВСТАВИТЬ ПОСЛЕ <main> (под контентом)
+    sizes: [[970, 250], [970, 90], [728, 90], [320, 100], [320, 50]],
+    reserve: [728, 90],
+  },
 ];
-
-function reserveCss([w, h]: Size): string {
-  return `display:block;min-width:${w}px;min-height:${h}px;`;
-}
+// function reserveCss([w, h]: Size): string {
+//   return `display:block;min-width:${w}px;min-height:${h}px;`;
+// }
 
 function mountSlot(anchor: Element, slot: AnchorSlot): HTMLIFrameElement {
-  const container = document.createElement("div");
-  container.className = "ad-container";
-  const [rw, rh] = slot.reserve ?? slot.sizes[0] ?? [300, 250];
-  container.setAttribute("style", `${reserveCss([rw, rh])};position:relative;`);
+  // внешний бэнд на всю ширину
+  const band = document.createElement("div");
+  band.className = "ad-band";
+  band.style.cssText = "width:100%;display:block;";
 
+  // внутренний контейнер как у твоего Container (max-w-5xl)
+  const inner = document.createElement("div");
+  inner.className = "ad-container";
+  const [rw, rh] = slot.reserve ?? slot.sizes[0] ?? [300, 250];
+  inner.style.cssText =
+    `position:relative;max-width:64rem;margin:0 auto;padding:0 1rem;` +
+    `min-height:${rh}px;`;
+
+  // iframe
   const frame = document.createElement("iframe");
   frame.id = slot.code;
   frame.title = `Advertisement: ${slot.code}`;
   frame.width = String(rw);
   frame.height = String(rh);
   frame.style.border = "0";
+  frame.style.display = "block";
+  frame.style.margin = "0 auto";   // центр по контейнеру
+  frame.style.overflow = "hidden"; // на всякий случай
+  frame.setAttribute("scrolling", "no"); // скрыть полосы в старых UA
+  frame.setAttribute("frameborder", "0");
 
-  container.appendChild(frame);
-  anchor.insertAdjacentElement(slot.position, container);
+  inner.appendChild(frame);
+  band.appendChild(inner);
+  anchor.insertAdjacentElement(slot.position, band);
   return frame;
 }
+
 
 function toPbjsSizes(sizes: readonly Size[]): PbjsSize[] {
   return sizes.map(([w, h]) => [w, h] as const) as PbjsSize[];
@@ -140,24 +167,40 @@ function bindEventsOnce(pb: Pbjs): void {
   if (eventsBound) return;
   eventsBound = true;
 
-  pb.onEvent("bidResponse", (bid) => {
-    if (rendered.has(bid.adUnitCode)) return;
-    const iframe = document.getElementById(bid.adUnitCode) as HTMLIFrameElement | null;
-    const doc = iframe?.contentWindow?.document;
-    if (!doc) return;
+pb.onEvent("bidResponse", (bid) => {
+  if (rendered.has(bid.adUnitCode)) return;
 
-    if (doc.readyState === "loading") {
-      doc.open();
-      doc.write("<!doctype html><html><head></head><body></body></html>");
-      doc.close();
-    }
-    try {
-      pb.renderAd(doc, bid.adId);
-      rendered.add(bid.adUnitCode);
-    } catch {
-      // тихо игнорим – учебный сетап
-    }
-  });
+  const iframe = document.getElementById(bid.adUnitCode) as HTMLIFrameElement | null;
+  const doc = iframe?.contentWindow?.document;
+  if (!doc) return;
+
+  // Если пришли реальные размеры — применяем их
+  if (typeof bid.width === "number" && typeof bid.height === "number") {
+    iframe.width  = String(bid.width);
+    iframe.height = String(bid.height);
+    iframe.style.width  = `${bid.width}px`;
+    iframe.style.height = `${bid.height}px`;
+    const host = iframe.parentElement as HTMLElement | null; // .ad-container
+    if (host) host.style.minHeight = `${bid.height}px`;
+  }
+
+  // Скелет без отступов и без прокрутки внутри фрейма
+  if (doc.readyState === "loading") {
+    doc.open();
+    doc.write(
+      "<!doctype html><html><head>" +
+      "<meta charset='utf-8'/>" +
+      "<style>html,body{margin:0;padding:0;overflow:hidden}</style>" +
+      "</head><body></body></html>"
+    );
+    doc.close();
+  }
+
+  try {
+    pb.renderAd(doc, bid.adId);
+    rendered.add(bid.adUnitCode);
+  } catch { /* no-op в учебном сетапе */ }
+});
 }
 
 /** Сканирует DOM, монтирует недостающие iframes и возвращает коды смонтированных слотов */
@@ -179,7 +222,15 @@ function runAuctionFor(codes: string[]): void {
   if (!pb || codes.length === 0) return;
 
   pb.que.push(() => {
-    pb.setConfig?.({ debug: true, userSync: { enabled: false } });
+    pb.setConfig?.({
+  debug: true,
+  userSync: { enabled: false },
+  sizeConfig: [
+    { mediaQuery: "(max-width: 480px)", sizesSupported: [[320, 50], [320, 100]] },
+    { mediaQuery: "(min-width: 481px) and (max-width: 1024px)", sizesSupported: [[728, 90]] },
+    { mediaQuery: "(min-width: 1025px)", sizesSupported: [[970, 250], [970, 90], [728, 90]] },
+  ],
+});
     bindEventsOnce(pb);
 
     const units: PbjsAdUnit[] = ANCHORS

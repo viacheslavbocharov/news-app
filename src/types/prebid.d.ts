@@ -113,6 +113,18 @@ declare global {
     getHighestCpmBids?(adUnitCode?: string): PbjsBid[];
   }
 
+  interface PbjsSizeConfig {
+    mediaQuery: string;
+    sizesSupported: PbjsSize[]; // массив кортежей [w,h]
+    labels?: string[];
+  }
+
+  interface PbjsConfig {
+    debug?: boolean;
+    userSync?: PbjsUserSyncConfig;
+    sizeConfig?: PbjsSizeConfig[];
+  }
+
   interface Window {
     pbjs: Pbjs;
   }
