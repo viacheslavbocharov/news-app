@@ -11,7 +11,6 @@
 //   { code: "ad-home-sidebar", selector: "main .max-w-5xl", position: "beforeend",  sizes: [[300,250],[300,600]], reserve: [300,250] },
 // ];
 
-
 // const adUnits: PbjsAdUnit[] = [
 //   {
 //     code: "ad-home-top",
@@ -45,7 +44,6 @@
 
 //   window.pbjs.que.push(() => {
 
-    
 //     window.pbjs.addAdUnits(adUnits);
 
 //     window.pbjs.onEvent("bidResponse", (bid) => {
@@ -73,6 +71,9 @@
 
 type Size = readonly [number, number];
 
+const ADTELLIGENT_AID = 350975; // из официальных тест-параметров
+const BIDMATIC_SOURCE = 886409;
+
 type AnchorSlot = {
   code: string;
   selector: string;
@@ -84,16 +85,28 @@ type AnchorSlot = {
 const ANCHORS: readonly AnchorSlot[] = [
   {
     code: "ad-home-top",
-    selector: "main",           // якорь — сам <main>
-    position: "beforebegin",    // ВСТАВИТЬ ПЕРЕД <main> (над контентом)
-    sizes: [[970, 250], [970, 90], [728, 90], [320, 100], [320, 50]],
+    selector: "main", // якорь — сам <main>
+    position: "beforebegin", // ВСТАВИТЬ ПЕРЕД <main> (над контентом)
+    sizes: [
+      [970, 250],
+      [970, 90],
+      [728, 90],
+      [320, 100],
+      [320, 50],
+    ],
     reserve: [728, 90],
   },
   {
     code: "ad-home-bottom",
-    selector: "main",           // тот же якорь
-    position: "afterend",       // ВСТАВИТЬ ПОСЛЕ <main> (под контентом)
-    sizes: [[970, 250], [970, 90], [728, 90], [320, 100], [320, 50]],
+    selector: "main", // тот же якорь
+    position: "afterend", // ВСТАВИТЬ ПОСЛЕ <main> (под контентом)
+    sizes: [
+      [970, 250],
+      [970, 90],
+      [728, 90],
+      [320, 100],
+      [320, 50],
+    ],
     reserve: [728, 90],
   },
 ];
@@ -112,8 +125,7 @@ function mountSlot(anchor: Element, slot: AnchorSlot): HTMLIFrameElement {
   inner.className = "ad-container";
   const [rw, rh] = slot.reserve ?? slot.sizes[0] ?? [300, 250];
   inner.style.cssText =
-    `position:relative;max-width:64rem;margin:0 auto;padding:0 1rem;` +
-    `min-height:${rh}px;`;
+    `position:relative;max-width:64rem;margin:0 auto;padding:0 1rem;` + `min-height:${rh}px;`;
 
   // iframe
   const frame = document.createElement("iframe");
@@ -123,7 +135,7 @@ function mountSlot(anchor: Element, slot: AnchorSlot): HTMLIFrameElement {
   frame.height = String(rh);
   frame.style.border = "0";
   frame.style.display = "block";
-  frame.style.margin = "0 auto";   // центр по контейнеру
+  frame.style.margin = "0 auto"; // центр по контейнеру
   frame.style.overflow = "hidden"; // на всякий случай
   frame.setAttribute("scrolling", "no"); // скрыть полосы в старых UA
   frame.setAttribute("frameborder", "0");
@@ -134,7 +146,6 @@ function mountSlot(anchor: Element, slot: AnchorSlot): HTMLIFrameElement {
   return frame;
 }
 
-
 function toPbjsSizes(sizes: readonly Size[]): PbjsSize[] {
   return sizes.map(([w, h]) => [w, h] as const) as PbjsSize[];
 }
@@ -144,8 +155,10 @@ function toAdUnit(code: string, sizes: readonly Size[]): PbjsAdUnit {
     code,
     mediaTypes: { banner: { sizes: toPbjsSizes(sizes) } },
     bids: [
-      { bidder: "adtelligent", params: { aid: 350975 } },
-      // второй адаптер добавишь здесь при необходимости
+      // Adtelligent
+      { bidder: "adtelligent", params: { aid: ADTELLIGENT_AID } },
+      // Bidmatic
+      { bidder: "bidmatic", params: { source: BIDMATIC_SOURCE } },
     ],
   };
 }
@@ -153,7 +166,9 @@ function toAdUnit(code: string, sizes: readonly Size[]): PbjsAdUnit {
 function getPbjs(): Pbjs | null {
   const maybe = (window as unknown as { pbjs?: Pbjs }).pbjs ?? null;
   if (!maybe) {
-    console.error('[ads] pbjs script not found. Ensure <script src="/prebid10.10.0.js"> in index.html');
+    console.error(
+      '[ads] pbjs script not found. Ensure <script src="/prebid10.10.0.js"> in index.html',
+    );
     return null;
   }
   if (!Array.isArray(maybe.que)) maybe.que = [];
@@ -167,40 +182,50 @@ function bindEventsOnce(pb: Pbjs): void {
   if (eventsBound) return;
   eventsBound = true;
 
-pb.onEvent("bidResponse", (bid) => {
-  if (rendered.has(bid.adUnitCode)) return;
+  pb.onEvent("auctionInit", (evt: PbjsAuctionInitEvent) => {
+    const bidders = (evt.bidderRequests ?? []).map((r) => {
+      const br = r as { bidderCode?: string };
+      return br.bidderCode ?? "unknown";
+    });
+    console.log("[ads] bidders in auction:", bidders);
+  });
 
-  const iframe = document.getElementById(bid.adUnitCode) as HTMLIFrameElement | null;
-  const doc = iframe?.contentWindow?.document;
-  if (!doc) return;
+  pb.onEvent("bidResponse", (bid) => {
+    if (rendered.has(bid.adUnitCode)) return;
 
-  // Если пришли реальные размеры — применяем их
-  if (typeof bid.width === "number" && typeof bid.height === "number") {
-    iframe.width  = String(bid.width);
-    iframe.height = String(bid.height);
-    iframe.style.width  = `${bid.width}px`;
-    iframe.style.height = `${bid.height}px`;
-    const host = iframe.parentElement as HTMLElement | null; // .ad-container
-    if (host) host.style.minHeight = `${bid.height}px`;
-  }
+    const iframe = document.getElementById(bid.adUnitCode) as HTMLIFrameElement | null;
+    const doc = iframe?.contentWindow?.document;
+    if (!doc) return;
 
-  // Скелет без отступов и без прокрутки внутри фрейма
-  if (doc.readyState === "loading") {
-    doc.open();
-    doc.write(
-      "<!doctype html><html><head>" +
-      "<meta charset='utf-8'/>" +
-      "<style>html,body{margin:0;padding:0;overflow:hidden}</style>" +
-      "</head><body></body></html>"
-    );
-    doc.close();
-  }
+    // Если пришли реальные размеры — применяем их
+    if (typeof bid.width === "number" && typeof bid.height === "number") {
+      iframe.width = String(bid.width);
+      iframe.height = String(bid.height);
+      iframe.style.width = `${bid.width}px`;
+      iframe.style.height = `${bid.height}px`;
+      const host = iframe.parentElement as HTMLElement | null; // .ad-container
+      if (host) host.style.minHeight = `${bid.height}px`;
+    }
 
-  try {
-    pb.renderAd(doc, bid.adId);
-    rendered.add(bid.adUnitCode);
-  } catch { /* no-op в учебном сетапе */ }
-});
+    // Скелет без отступов и без прокрутки внутри фрейма
+    if (doc.readyState === "loading") {
+      doc.open();
+      doc.write(
+        "<!doctype html><html><head>" +
+          "<meta charset='utf-8'/>" +
+          "<style>html,body{margin:0;padding:0;overflow:hidden}</style>" +
+          "</head><body></body></html>",
+      );
+      doc.close();
+    }
+
+    try {
+      pb.renderAd(doc, bid.adId);
+      rendered.add(bid.adUnitCode);
+    } catch {
+      /* no-op в учебном сетапе */
+    }
+  });
 }
 
 /** Сканирует DOM, монтирует недостающие iframes и возвращает коды смонтированных слотов */
@@ -223,22 +248,36 @@ function runAuctionFor(codes: string[]): void {
 
   pb.que.push(() => {
     pb.setConfig?.({
-  debug: true,
-  userSync: { enabled: false },
-  sizeConfig: [
-    { mediaQuery: "(max-width: 480px)", sizesSupported: [[320, 50], [320, 100]] },
-    { mediaQuery: "(min-width: 481px) and (max-width: 1024px)", sizesSupported: [[728, 90]] },
-    { mediaQuery: "(min-width: 1025px)", sizesSupported: [[970, 250], [970, 90], [728, 90]] },
-  ],
-});
+      debug: true,
+      userSync: { enabled: false },
+      bidderTimeout: 3000,
+      sizeConfig: [
+        {
+          mediaQuery: "(max-width: 480px)",
+          sizesSupported: [
+            [320, 50],
+            [320, 100],
+          ],
+        },
+        { mediaQuery: "(min-width: 481px) and (max-width: 1024px)", sizesSupported: [[728, 90]] },
+        {
+          mediaQuery: "(min-width: 1025px)",
+          sizesSupported: [
+            [970, 250],
+            [970, 90],
+            [728, 90],
+          ],
+        },
+      ],
+    });
     bindEventsOnce(pb);
 
-    const units: PbjsAdUnit[] = ANCHORS
-      .filter((a) => codes.includes(a.code))
-      .map((a) => toAdUnit(a.code, a.sizes));
+    const units: PbjsAdUnit[] = ANCHORS.filter((a) => codes.includes(a.code)).map((a) =>
+      toAdUnit(a.code, a.sizes),
+    );
 
     pb.addAdUnits(units);
-    pb.requestBids({ timeout: 1000, adUnitCodes: codes });
+    pb.requestBids({ timeout: 3000, adUnitCodes: codes });
   });
 }
 

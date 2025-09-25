@@ -123,6 +123,7 @@ declare global {
     debug?: boolean;
     userSync?: PbjsUserSyncConfig;
     sizeConfig?: PbjsSizeConfig[];
+    bidderTimeout?: number;
   }
 
   interface Window {
