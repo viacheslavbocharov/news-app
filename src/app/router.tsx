@@ -1,10 +1,13 @@
 import { createBrowserRouter } from "react-router-dom";
+import AdsDebug from "@/pages/AdsDebug";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
 import NewsDetails from "@/pages/NewsDetails";
 import Register from "@/pages/Register";
 import Layout from "./layout";
 import ProtectedRoute from "./ProtectedRoute";
+
+const ADS_ENABLED = import.meta.env.VITE_ENABLE_ADS === "true";
 
 export const router = createBrowserRouter([
   {
@@ -13,6 +16,7 @@ export const router = createBrowserRouter([
       { path: "/", element: <Home /> },
       { path: "/login", element: <Login /> },
       { path: "/register", element: <Register /> },
+      ...(ADS_ENABLED ? [{ path: "/ads-debug", element: <AdsDebug /> }] : []),
 
       // будущие приватные страницы:
       {
