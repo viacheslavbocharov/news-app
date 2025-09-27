@@ -1,14 +1,25 @@
-type Size = readonly [number, number];
+import type {
+  Pbjs,
+  PbjsAdUnit,
+  PbjsAuctionEndEvent,
+  PbjsAuctionInitEvent,
+  PbjsBid,
+  PbjsGlobal,
+  PbjsPlaceholder,
+  PbjsSize,
+} from "./pbjs.types";
 
 const ADTELLIGENT_AID = 350975;
 const BIDMATIC_SOURCE = 886409;
+const BOCHAROV_PUBLISHER_ID = "demo-pub-123";
+const PREBID_SRC = import.meta.env.VITE_PREBID_SRC || "/prebid.js";
 
 type AnchorSlot = {
   code: string;
   selector: string;
   position: InsertPosition;
-  sizes: readonly Size[];
-  reserve?: Size;
+  sizes: readonly PbjsSize[];
+  reserve?: PbjsSize;
 };
 
 const ANCHORS: readonly AnchorSlot[] = [
@@ -42,6 +53,37 @@ const ANCHORS: readonly AnchorSlot[] = [
 
 type AdEventType = "auctionInit" | "bidResponse" | "bidWon" | "auctionEnd" | "renderError";
 
+function isFullPbjs(x: Pbjs | PbjsPlaceholder | undefined): x is Pbjs {
+  return (
+    !!x &&
+    typeof (x as Pbjs).addAdUnits === "function" &&
+    typeof (x as Pbjs).requestBids === "function"
+  );
+}
+
+function loadPrebidScript(): Promise<Pbjs> {
+  const w = window as unknown as PbjsGlobal;
+
+  if (isFullPbjs(w.pbjs)) return Promise.resolve(w.pbjs);
+  if (w._pbjsLoad) return w._pbjsLoad;
+
+  if (!w.pbjs) w.pbjs = { que: [] } as PbjsPlaceholder;
+
+  w._pbjsLoad = new Promise<Pbjs>((resolve, reject) => {
+    const s = document.createElement("script");
+    s.src = PREBID_SRC;
+    s.async = true;
+    s.onload = () => {
+      if (isFullPbjs(w.pbjs)) resolve(w.pbjs);
+      else reject(new Error(`[ads] Prebid loaded but global pbjs is incomplete (${PREBID_SRC})`));
+    };
+    s.onerror = () => reject(new Error(`[ads] failed to load Prebid from ${PREBID_SRC}`));
+    document.head.appendChild(s);
+  });
+
+  return w._pbjsLoad;
+}
+
 function emitAdEvent(type: AdEventType, data: unknown): void {
   window.dispatchEvent(new CustomEvent("ads:event", { detail: { type, data, ts: Date.now() } }));
 }
@@ -55,7 +97,6 @@ function mountSlot(anchor: Element, slot: AnchorSlot): HTMLIFrameElement {
   inner.className = "ad-container";
   const [rw, rh] = slot.reserve ?? slot.sizes[0] ?? [300, 250];
   inner.style.cssText = `position:relative;max-width:64rem;margin:0 auto;padding:0 1rem;min-height:${rh}px;`;
-
   const frame = document.createElement("iframe");
   frame.id = slot.code;
   frame.title = `Advertisement: ${slot.code}`;
@@ -74,27 +115,26 @@ function mountSlot(anchor: Element, slot: AnchorSlot): HTMLIFrameElement {
   return frame;
 }
 
-function toPbjsSizes(sizes: readonly Size[]): PbjsSize[] {
+function toPbjsSizes(sizes: readonly PbjsSize[]): PbjsSize[] {
   return sizes.map(([w, h]) => [w, h] as const) as PbjsSize[];
 }
 
-function toAdUnit(code: string, sizes: readonly Size[]): PbjsAdUnit {
+function toAdUnit(code: string, sizes: readonly PbjsSize[]): PbjsAdUnit {
   return {
     code,
     mediaTypes: { banner: { sizes: toPbjsSizes(sizes) } },
     bids: [
       { bidder: "adtelligent", params: { aid: ADTELLIGENT_AID } },
       { bidder: "bidmatic", params: { source: BIDMATIC_SOURCE } },
+      { bidder: "bocharov", params: { publisherId: BOCHAROV_PUBLISHER_ID } },
     ],
   };
 }
 
 function getPbjs(): Pbjs | null {
-  const maybe = (window as unknown as { pbjs?: Pbjs }).pbjs ?? null;
+  const maybe = window.pbjs ?? null;
   if (!maybe) {
-    console.error(
-      '[ads] pbjs script not found. Ensure <script src="/prebid10.10.0.js"> in index.html',
-    );
+    console.error(`[ads] pbjs is not available. Make sure PREBID is loaded from ${PREBID_SRC}`);
     return null;
   }
   if (!Array.isArray(maybe.que)) maybe.que = [];
@@ -108,16 +148,15 @@ function bindEventsOnce(pbjs: Pbjs): void {
   if (eventsBound) return;
   eventsBound = true;
 
-  // почему не рендерим bidWon:
-  // bidWon испускается после renderAd или когда ад-сервер отдал креатив.
-  // Если ждать bidWon, чтобы вызвать renderAd, событие не придёт.
-  // Поэтому рендерим на bidResponse сразу после аукциона.
+  // Почему не рендерим по bidWon?
+  // bidWon происходит после renderAd; если ждать bidWon, вызов renderAd никогда не случится.
+  // Поэтому рендерим на bidResponse.
 
-  pbjs.onEvent("auctionInit", (evt) => {
+  pbjs.onEvent("auctionInit", (evt: PbjsAuctionInitEvent) => {
     emitAdEvent("auctionInit", evt);
   });
 
-  pbjs.onEvent("bidResponse", (bid) => {
+  pbjs.onEvent("bidResponse", (bid: PbjsBid) => {
     emitAdEvent("bidResponse", bid);
     if (rendered.has(bid.adUnitCode)) return;
 
@@ -149,15 +188,15 @@ function bindEventsOnce(pbjs: Pbjs): void {
       pbjs.renderAd(doc, bid.adId);
       rendered.add(bid.adUnitCode);
     } catch {
-      /* ignore or handle */
+      /* ignore*/
     }
   });
 
-  pbjs.onEvent("bidWon", (bid) => {
+  pbjs.onEvent("bidWon", (bid: PbjsBid) => {
     emitAdEvent("bidWon", bid);
   });
 
-  pbjs.onEvent("auctionEnd", (evt) => {
+  pbjs.onEvent("auctionEnd", (evt: PbjsAuctionEndEvent) => {
     emitAdEvent("auctionEnd", evt);
   });
 }
@@ -192,7 +231,10 @@ function runAuctionFor(codes: string[]): void {
             [320, 100],
           ],
         },
-        { mediaQuery: "(min-width: 481px) and (max-width: 1024px)", sizesSupported: [[728, 90]] },
+        {
+          mediaQuery: "(min-width: 481px) and (max-width: 1024px)",
+          sizesSupported: [[728, 90]],
+        },
         {
           mediaQuery: "(min-width: 1025px)",
           sizesSupported: [
@@ -215,7 +257,9 @@ function runAuctionFor(codes: string[]): void {
   });
 }
 
-function start(): void {
+async function start(): Promise<void> {
+  await loadPrebidScript();
+
   const first = scanAndMountOnce();
   if (first.length > 0) runAuctionFor(first);
 
